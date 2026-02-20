@@ -17,9 +17,13 @@ inputs:
     required: false
     default: '10'
   stale_threshold:
-    description: 'Seconds after which a lock is considered stale and can be force-acquired'
+    description: 'Seconds after which a lock is considered stale and can be force-acquired. Set to 0 to disable.'
     required: false
     default: '600'
+  fail_on_timeout:
+    description: 'Fail the step if the lock cannot be acquired within timeout. Set to false to skip gracefully.'
+    required: false
+    default: 'true'
   token:
     description: 'GitHub token with contents:write permission'
     required: true

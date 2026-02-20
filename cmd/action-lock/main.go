@@ -25,7 +25,7 @@ func main() {
 		acquired := acquire(client, cfg)
 		outputs.Set("acquired", fmt.Sprintf("%t", acquired))
 		outputs.Set("lock_ref", lockRef)
-		if !acquired {
+		if !acquired && cfg.FailOnTimeout {
 			outputs.Error(fmt.Sprintf("Failed to acquire lock %q within %ds", cfg.LockName, cfg.Timeout))
 			os.Exit(1)
 		}
@@ -50,9 +50,9 @@ func acquire(client *lock.Client, cfg *inputs.Config) bool {
 			return true
 		}
 
-		// Check for stale lock
+		// Check for stale lock (disabled when stale_threshold is 0)
 		age, err := client.LockAge(cfg.LockName)
-		if err == nil && age > cfg.StaleThreshold {
+		if cfg.StaleThreshold > 0 && err == nil && age > cfg.StaleThreshold {
 			fmt.Printf("Stale lock detected (%ds old, threshold %ds), removing...\n", age, cfg.StaleThreshold)
 			if err := client.Release(cfg.LockName); err != nil {
 				fmt.Fprintf(os.Stderr, "Warning: failed to remove stale lock: %v\n", err)

@@ -12,6 +12,7 @@ type Config struct {
 	Timeout        int
 	PollInterval   int
 	StaleThreshold int
+	FailOnTimeout  bool
 	Token          string
 	Repository     string
 	SHA            string
@@ -46,6 +47,7 @@ func Parse() (*Config, error) {
 	timeout := intEnv("INPUT_TIMEOUT", 300)
 	pollInterval := intEnv("INPUT_POLL_INTERVAL", 10)
 	staleThreshold := intEnv("INPUT_STALE_THRESHOLD", 600)
+	failOnTimeout := boolEnv("INPUT_FAIL_ON_TIMEOUT", true)
 
 	return &Config{
 		Action:         action,
@@ -53,10 +55,23 @@ func Parse() (*Config, error) {
 		Timeout:        timeout,
 		PollInterval:   pollInterval,
 		StaleThreshold: staleThreshold,
+		FailOnTimeout:  failOnTimeout,
 		Token:          token,
 		Repository:     repo,
 		SHA:            sha,
 	}, nil
+}
+
+func boolEnv(key string, defaultVal bool) bool {
+	v := os.Getenv(key)
+	if v == "" {
+		return defaultVal
+	}
+	b, err := strconv.ParseBool(v)
+	if err != nil {
+		return defaultVal
+	}
+	return b
 }
 
 func intEnv(key string, defaultVal int) int {

@@ -44,7 +44,8 @@ jobs:
 | `lock_name` | Name of the lock (used as ref name under `refs/locks/`) | Yes | |
 | `timeout` | Maximum time in seconds to wait for lock acquisition | No | `300` |
 | `poll_interval` | Seconds between lock acquisition attempts | No | `10` |
-| `stale_threshold` | Seconds after which a lock is considered stale and can be force-acquired | No | `600` |
+| `stale_threshold` | Seconds after which a lock is considered stale and can be force-acquired. Set to `0` to disable stale detection. | No | `600` |
+| `fail_on_timeout` | Fail the step if the lock cannot be acquired within timeout. Set to `false` to skip gracefully. | No | `true` |
 | `token` | GitHub token with `contents:write` permission | Yes | |
 
 ## Outputs
@@ -96,32 +97,90 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-### Locking Terraform Apply
+### Locking a Dev Environment to a Pull Request
+
+Hold a lock for the entire lifetime of a PR — the dev environment is exclusively yours until the PR is closed. The main branch workflow waits for the lock before applying.
+
+**PR workflow** (`.github/workflows/terraform-pr.yaml`):
 
 ```yaml
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths: ['terraform/**']
+
 jobs:
   apply:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: acquire terraform lock
+      - name: acquire dev lock
         uses: DND-IT/action-lock@v0
         with:
           action: acquire
-          lock_name: terraform-${{ matrix.environment }}
-          timeout: 600
+          lock_name: terraform-dev
+          stale_threshold: 0  # never expire — held until PR closes
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: terraform apply
         run: terraform apply -auto-approve
+```
 
-      - name: release lock
-        if: always()
+**PR cleanup workflow** (`.github/workflows/terraform-pr-cleanup.yaml`):
+
+```yaml
+on:
+  pull_request:
+    types: [closed]
+    paths: ['terraform/**']
+
+jobs:
+  unlock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: release dev lock
         uses: DND-IT/action-lock@v0
         with:
           action: release
-          lock_name: terraform-${{ matrix.environment }}
+          lock_name: terraform-dev
+          token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+**Main branch workflow** (`.github/workflows/terraform-deploy.yaml`):
+
+```yaml
+on:
+  push:
+    branches: [main]
+    paths: ['terraform/**']
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: acquire dev lock
+        id: lock
+        uses: DND-IT/action-lock@v0
+        with:
+          action: acquire
+          lock_name: terraform-dev
+          timeout: 0
+          fail_on_timeout: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: terraform apply
+        if: steps.lock.outputs.acquired == 'true'
+        run: terraform apply -auto-approve
+
+      - name: release lock
+        if: steps.lock.outputs.acquired == 'true'
+        uses: DND-IT/action-lock@v0
+        with:
+          action: release
+          lock_name: terraform-dev
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
