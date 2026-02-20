@@ -19,7 +19,7 @@ jobs:
 
       - name: acquire lock
         id: lock
-        uses: DND-IT/action-lock@v1
+        uses: DND-IT/action-lock@v0
         with:
           action: acquire
           lock_name: release
@@ -29,7 +29,7 @@ jobs:
 
       - name: release lock
         if: always()
-        uses: DND-IT/action-lock@v1
+        uses: DND-IT/action-lock@v0
         with:
           action: release
           lock_name: release
@@ -76,7 +76,7 @@ jobs:
           fetch-depth: 0
 
       - name: acquire release lock
-        uses: DND-IT/action-lock@v1
+        uses: DND-IT/action-lock@v0
         with:
           action: acquire
           lock_name: semantic-release
@@ -89,7 +89,7 @@ jobs:
 
       - name: release lock
         if: always()
-        uses: DND-IT/action-lock@v1
+        uses: DND-IT/action-lock@v0
         with:
           action: release
           lock_name: semantic-release
@@ -106,7 +106,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: acquire terraform lock
-        uses: DND-IT/action-lock@v1
+        uses: DND-IT/action-lock@v0
         with:
           action: acquire
           lock_name: terraform-${{ matrix.environment }}
@@ -118,7 +118,7 @@ jobs:
 
       - name: release lock
         if: always()
-        uses: DND-IT/action-lock@v1
+        uses: DND-IT/action-lock@v0
         with:
           action: release
           lock_name: terraform-${{ matrix.environment }}
@@ -148,13 +148,13 @@ This action uses [release-please](https://github.com/googleapis/release-please) 
 ### Version Aliases
 
 The release workflow automatically updates version aliases:
-- `v1` — Always points to the latest v1.x.x release
-- `v1.0` — Always points to the latest v1.0.x release
+- `v0` — Always points to the latest v0.x.x release
+- `v0.1` — Always points to the latest v0.1.x release
 
 ```yaml
-- uses: DND-IT/action-lock@v1        # Always gets latest v1.x.x
-- uses: DND-IT/action-lock@v1.0      # Always gets latest v1.0.x
-- uses: DND-IT/action-lock@v1.0.0    # Pinned to specific version
+- uses: DND-IT/action-lock@v0        # Always gets latest v0.x.x
+- uses: DND-IT/action-lock@v0.1      # Always gets latest v0.1.x
+- uses: DND-IT/action-lock@v0.1.0    # Pinned to specific version
 ```
 
 ## License
