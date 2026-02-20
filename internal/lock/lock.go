@@ -9,19 +9,19 @@ import (
 	"time"
 )
 
-const apiBase = "https://api.github.com"
-
 type Client struct {
-	repo  string
-	token string
-	http  *http.Client
+	repo    string
+	token   string
+	http    *http.Client
+	baseURL string
 }
 
 func New(repo, token string) *Client {
 	return &Client{
-		repo:  repo,
-		token: token,
-		http:  &http.Client{Timeout: 10 * time.Second},
+		repo:    repo,
+		token:   token,
+		http:    &http.Client{Timeout: 10 * time.Second},
+		baseURL: "https://api.github.com",
 	}
 }
 
@@ -39,7 +39,7 @@ func (c *Client) Acquire(lockName, sha string) (bool, error) {
 		"sha": sha,
 	})
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/repos/%s/git/refs", apiBase, c.repo), bytes.NewReader(body))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/repos/%s/git/refs", c.baseURL, c.repo), bytes.NewReader(body))
 	if err != nil {
 		return false, err
 	}
@@ -68,7 +68,7 @@ func (c *Client) Acquire(lockName, sha string) (bool, error) {
 func (c *Client) Release(lockName string) error {
 	ref := c.refPath(lockName)
 
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/repos/%s/git/refs/%s", apiBase, c.repo, ref), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/repos/%s/git/refs/%s", c.baseURL, c.repo, ref), nil)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (c *Client) LockAge(lockName string) (int, error) {
 }
 
 func (c *Client) getRefSHA(ref string) (string, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/repos/%s/git/ref/%s", apiBase, c.repo, ref), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/repos/%s/git/ref/%s", c.baseURL, c.repo, ref), nil)
 	if err != nil {
 		return "", err
 	}
@@ -137,7 +137,7 @@ func (c *Client) getRefSHA(ref string) (string, error) {
 }
 
 func (c *Client) getCommitDate(sha string) (time.Time, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/repos/%s/git/commits/%s", apiBase, c.repo, sha), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/repos/%s/git/commits/%s", c.baseURL, c.repo, sha), nil)
 	if err != nil {
 		return time.Time{}, err
 	}
