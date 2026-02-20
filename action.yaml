@@ -32,7 +32,7 @@ outputs:
 
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/dnd-it/action-lock:0.1.0' # x-release-please-version
+  image: 'docker://ghcr.io/dnd-it/action-lock:0.0.0' # x-release-please-version
 
 branding:
   icon: 'lock'
