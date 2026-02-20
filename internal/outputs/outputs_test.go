@@ -19,12 +19,12 @@ func captureStdout(t *testing.T, fn func()) string {
 
 	fn()
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = origStdout
 
 	buf := make([]byte, 4096)
 	n, _ := r.Read(buf)
-	r.Close()
+	_ = r.Close()
 	return string(buf[:n])
 }
 
@@ -35,7 +35,7 @@ func TestSet_WithGitHubOutput(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create temp: %v", err)
 	}
-	tmp.Close()
+	_ = tmp.Close()
 
 	t.Setenv("GITHUB_OUTPUT", tmp.Name())
 
@@ -55,7 +55,7 @@ func TestSet_WithGitHubOutput_Append(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create temp: %v", err)
 	}
-	tmp.Close()
+	_ = tmp.Close()
 
 	t.Setenv("GITHUB_OUTPUT", tmp.Name())
 

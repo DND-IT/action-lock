@@ -74,7 +74,7 @@ func TestAcquire_AlreadyHeld(t *testing.T) {
 func TestAcquire_ServerError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("internal error"))
+		_, _ = w.Write([]byte("internal error"))
 	}))
 	defer srv.Close()
 
@@ -123,7 +123,7 @@ func TestRelease_NotFound_Idempotent(t *testing.T) {
 func TestRelease_ServerError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("server error"))
+		_, _ = w.Write([]byte("server error"))
 	}))
 	defer srv.Close()
 
@@ -139,13 +139,13 @@ func TestLockAge_Found(t *testing.T) {
 	commitTime := time.Now().Add(-60 * time.Second)
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch {
-		case r.URL.Path == "/repos/owner/repo/git/ref/locks/deploy":
-			json.NewEncoder(w).Encode(map[string]interface{}{
+		switch r.URL.Path {
+		case "/repos/owner/repo/git/ref/locks/deploy":
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"object": map[string]string{"sha": "abc123"},
 			})
-		case r.URL.Path == "/repos/owner/repo/git/commits/abc123":
-			json.NewEncoder(w).Encode(map[string]interface{}{
+		case "/repos/owner/repo/git/commits/abc123":
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"committer": map[string]string{"date": commitTime.Format(time.RFC3339)},
 			})
 		default:
@@ -183,12 +183,12 @@ func TestLockAge_RefNotFound(t *testing.T) {
 
 func TestLockAge_CommitError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch {
-		case r.URL.Path == "/repos/owner/repo/git/ref/locks/deploy":
-			json.NewEncoder(w).Encode(map[string]interface{}{
+		switch r.URL.Path {
+		case "/repos/owner/repo/git/ref/locks/deploy":
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"object": map[string]string{"sha": "abc123"},
 			})
-		case r.URL.Path == "/repos/owner/repo/git/commits/abc123":
+		case "/repos/owner/repo/git/commits/abc123":
 			w.WriteHeader(http.StatusInternalServerError)
 		default:
 			w.WriteHeader(http.StatusNotFound)

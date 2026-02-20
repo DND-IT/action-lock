@@ -49,7 +49,7 @@ func (c *Client) Acquire(lockName, sha string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusCreated {
 		return true, nil
@@ -78,7 +78,7 @@ func (c *Client) Release(lockName string) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusNoContent || resp.StatusCode == http.StatusNotFound {
 		return nil
@@ -119,7 +119,7 @@ func (c *Client) getRefSHA(ref string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("ref not found: %d", resp.StatusCode)
@@ -147,7 +147,7 @@ func (c *Client) getCommitDate(sha string) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return time.Time{}, fmt.Errorf("commit not found: %d", resp.StatusCode)

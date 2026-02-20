@@ -17,9 +17,9 @@ func Set(key, value string) {
 		fmt.Fprintf(os.Stderr, "::error::Failed to open GITHUB_OUTPUT: %v\n", err)
 		return
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
-	fmt.Fprintf(f, "%s=%s\n", key, value)
+	_, _ = fmt.Fprintf(f, "%s=%s\n", key, value)
 }
 
 func Notice(msg string) {
