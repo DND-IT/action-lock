@@ -1,6 +1,6 @@
 # action-lock
 
-> **⚠️ This repository is archived.** It is no longer maintained and will not receive updates or fixes. Existing version tags keep working, but consider pinning to a specific version or forking if you depend on it.
+> **⚠️ This repository is archived.** It is no longer maintained and will not receive updates or fixes. It has been replaced by [DND-IT/tamci](https://github.com/DND-IT/tamci), a unified Go CLI that includes the lock functionality. Existing version tags keep working, but please migrate to `tamci`.
 
 A GitHub Action for distributed mutex locking using git refs. Serialize concurrent workflow jobs to prevent race conditions.
 
