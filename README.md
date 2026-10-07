@@ -1,5 +1,7 @@
 # action-lock
 
+> **⚠️ This repository is archived.** It is no longer maintained and will not receive updates or fixes. Existing version tags keep working, but consider pinning to a specific version or forking if you depend on it.
+
 A GitHub Action for distributed mutex locking using git refs. Serialize concurrent workflow jobs to prevent race conditions.
 
 ## Why Use This?
